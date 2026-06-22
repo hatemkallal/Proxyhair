@@ -1,17 +1,18 @@
 // api/analyze.js — Proxy Vercel vers l'API Anthropic
-// Ce fichier tourne côté serveur Vercel : la clé API n'est jamais exposée au navigateur
-
 export default async function handler(req, res) {
+
+  // Gestion du preflight CORS (requête OPTIONS du navigateur)
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
+
   // Sécurité : uniquement les requêtes POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Méthode non autorisée' });
   }
-
-  // Optionnel : restreindre aux domaines autorisés (décommente et adapte)
-  // const origin = req.headers.origin;
-  // if (origin !== 'https://ton-compte.github.io') {
-  //   return res.status(403).json({ error: 'Origine non autorisée' });
-  // }
 
   try {
     const { imageBase64, style, preferences } = req.body;
